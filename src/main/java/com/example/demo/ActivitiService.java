@@ -41,9 +41,6 @@ public class ActivitiService {
 				runtimeService.startProcessInstanceByKey("MyProcess1");
 		// 查询当前任务
         Task currentTask = taskService.createTaskQuery().processInstanceId(processInstance.getId()).singleResult();
-        
-        System.out.println("taskId=======================>"+currentTask.getId());
-        
         // 申明任务
         taskService.claim(currentTask.getId(), userName);
 
@@ -58,10 +55,17 @@ public class ActivitiService {
 	public List<Map<String, Object>> loadMyApply(HttpSession session) {
 		List<Map<String, Object>> list=new ArrayList<>();
 		String userName=session.getAttribute("userName").toString();
-		List<Task> taskList=taskService.createTaskQuery().taskAssignee(userName).list();
-		System.out.println("taskList=============>"+taskList.size());
-		
-		
+		List<ProcessInstance> instanceList = runtimeService.createProcessInstanceQuery().startedBy(userName).list();		
+		for(ProcessInstance pi:instanceList) {
+			String reason = runtimeService.getVariable(pi.getId(), "reason", String.class);
+			String option = runtimeService.getVariable(pi.getId(), "option", String.class);
+
+			Map<String,Object> m=new HashMap<String,Object>();
+			m.put("reason", reason);
+			m.put("option", option);
+			
+			list.add(m);
+		}
 		
 		return list;
 	}
