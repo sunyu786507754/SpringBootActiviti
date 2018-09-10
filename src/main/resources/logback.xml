@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<configuration scan="true" scanPeriod="60 seconds" debug="false">
+	<!-- 控制台输出 -->
+	<appender name="STDOUT" class="ch.qos.logback.core.ConsoleAppender">
+		<encoder>
+			<pattern>%d{HH:mm:ss} %-5p [%c] - %m%n</pattern>
+		</encoder>
+	</appender>
+	<!-- Activiti日志 -->
+	<logger name="org.activiti" level="ERROR" />
+	<logger name="org.activiti.engine.impl.persistence.entity" level="DEBUG" />
+	<root level="DEBUG">
+		<appender-ref ref="STDOUT" />
+	</root>
+</configuration>

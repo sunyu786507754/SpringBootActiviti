@@ -1,0 +1,19 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+<meta charset="UTF-8">
+<title>Insert title here</title>
+<script type="text/javascript" src="../static/js/jquery.min.js" th:src="@{/js/jquery.min.js}" ></script>
+</head>
+<body>
+	用户名:<input type="text" th:value="applyUser" id="userName" /><br/>
+	<input type="button" value="登录" onclick="login()" />
+	
+	<script type="text/javascript">
+		function login(){
+			var userName=$("#userName").val();
+			window.location.href="/apply/"+userName;
+		}
+	</script>
+</body>
+</html>

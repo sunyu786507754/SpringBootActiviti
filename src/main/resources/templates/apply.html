@@ -1,0 +1,75 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+<meta charset="UTF-8">
+<title>Insert title here</title>
+<script type="text/javascript" src="../static/js/jquery.min.js" th:src="@{/js/jquery.min.js}" ></script>
+<style type="text/css">
+	table{
+		background-color: #666666
+	}
+	td{
+		border: 1px solid black;
+	}
+</style>
+</head>
+<body>
+	<h1>请假申请</h1>
+	<table>
+		<tr>
+			<td>申请人:</td>
+			<td>
+				<input type="text" th:id="userName" readonly="readonly" th:value="${session.userName}" />
+			</td>
+			<td>申请事由:</td>
+			<td style="width: 300px;">
+				<input type="text" th:id="reason" value="" style="width: 290px;" />
+			</td>
+			<td>
+				<input type="button" value="提交" onclick="apply()" >
+			</td>
+		</tr>
+	</table>
+	<br />
+	<h1 >我申请的记录</h1>
+	<br />
+	<table id="myApply">
+		
+	
+	</table>
+	
+	
+	
+	<script type="text/javascript">
+		$(function(){
+			loadMyApply();
+		});
+		function loadMyApply(){
+			$.ajax({
+				url:'/loadMyApply',
+				type:'get',
+				dataType:'json',
+				success:function(data){
+					console.log(data);
+				}
+			});
+		}
+		function apply(){
+			var userName=$("#userName").val();
+			var reason=$("#reason").val();
+			$.ajax({
+				url:'/submitApply',
+				type:'post',
+				data:{
+					userName:userName,
+					reason:reason
+				},
+				dataType:'text',
+				success:function(data){
+					alert(data);
+				}
+			});
+		}
+	</script>
+</body>
+</html>
