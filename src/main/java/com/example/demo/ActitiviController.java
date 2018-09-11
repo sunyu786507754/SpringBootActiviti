@@ -51,7 +51,16 @@ public class ActitiviController {
 		List<Map<String,Object>> list=activitiService.loadMyApply(session);
 		return list;
 	}
-	
-	
+	/**
+	 * 待我审核的请假
+	 * @param session
+	 * @return
+	 */
+	@GetMapping("/holdOnMyAudit")
+	@ResponseBody
+	public List<Map<String,Object>> holdOnMyAudit(HttpSession session){
+		List<Map<String,Object>> list=activitiService.holdOnMyAudit(session);
+		return list;
+	}
 	
 }

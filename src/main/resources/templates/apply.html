@@ -33,17 +33,33 @@
 	<br />
 	<h1 >我申请的记录</h1>
 	<br />
-	<table id="myApply">
-		
-	
-	</table>
-	
+	<table id="myApply"></table>
+	<br />
+	<h1>待我审核的请假</h1>
+	<br />
+	<table id="holdOnMyAudit"></table>
 	
 	
 	<script type="text/javascript">
 		$(function(){
-			loadMyApply();
+// 			loadMyApply();
+			holdOnMyAudit();
 		});
+		//待我审核的请假
+		function holdOnMyAudit(){
+			$.ajax({
+				url:'/holdOnMyAudit',
+				type:'get',
+				dataType:'json',
+				success:function(data){
+					for(var i=0;i<data.length;i++){
+						var applyDate=data[i].applyDate;
+						var reason=data[i].reason;
+						$("#holdOnMyAudit").append("<tr><td>申请时间:</td><td>"+applyDate+"</td><td>请假事由:</td><td>"+reason+"</td></tr>");
+					}
+				}
+			});
+		}
 		//我申请的记录
 		function loadMyApply(){
 			$.ajax({
@@ -51,10 +67,15 @@
 				type:'get',
 				dataType:'json',
 				success:function(data){
-					console.log(data);
+					for(var i=0;i<data.length;i++){
+						var applyDate=data[i].applyDate;
+						var reason=data[i].reason;
+						$("#myApply").append("<tr><td>申请时间:</td><td>"+applyDate+"</td><td>请假事由:</td><td>"+reason+"</td></tr>");
+					}
 				}
 			});
 		}
+		//发起申请
 		function apply(){
 			var userName=$("#userName").val();
 			var reason=$("#reason").val();
