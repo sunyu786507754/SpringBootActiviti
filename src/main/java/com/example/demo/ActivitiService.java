@@ -46,7 +46,7 @@ public class ActivitiService {
 
         Map<String, Object> vars = new HashMap<>();
         vars.put("userName", userName);
-        vars.put("option", reason);
+        vars.put("reason", reason);
         vars.put("applyDate", new Date());
         // 完成任务
         taskService.complete(currentTask.getId(), vars);
@@ -58,11 +58,10 @@ public class ActivitiService {
 		List<ProcessInstance> instanceList = runtimeService.createProcessInstanceQuery().startedBy(userName).list();		
 		for(ProcessInstance pi:instanceList) {
 			String reason = runtimeService.getVariable(pi.getId(), "reason", String.class);
-			String option = runtimeService.getVariable(pi.getId(), "option", String.class);
 
 			Map<String,Object> m=new HashMap<String,Object>();
 			m.put("reason", reason);
-			m.put("option", option);
+			m.put("userName", userName);
 			
 			list.add(m);
 		}
