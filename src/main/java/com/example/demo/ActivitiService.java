@@ -17,6 +17,7 @@ import org.activiti.engine.history.HistoricProcessInstance;
 import org.activiti.engine.history.HistoricVariableInstance;
 import org.activiti.engine.identity.User;
 import org.activiti.engine.runtime.ProcessInstance;
+import org.activiti.engine.task.IdentityLink;
 import org.activiti.engine.task.Task;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -69,6 +70,15 @@ public class ActivitiService {
 			m.put("userName", userName);
 			m.put("applyDate", sdf.format(date));
 			
+			List<IdentityLink> identityLinkList=taskService.getIdentityLinksForTask("16");
+			StringBuffer sb=new StringBuffer();
+			for(IdentityLink il:identityLinkList) {
+	            if (sb.length() > 0) {//该步即不会第一位有逗号，也防止最后一位拼接逗号！
+	                sb.append(",");
+	            }
+	            sb.append(il.getUserId());
+			}
+			m.put("audit", sb.toString());
 			
 			list.add(m);
 		}
@@ -88,10 +98,12 @@ public class ActivitiService {
 			
 			String reason = runtimeService.getVariable(instance.getId(), "reason", String.class);
 			Date date=runtimeService.getVariable(instance.getId(), "applyDate", Date.class);
+			
 			Map<String,Object> m=new HashMap<String,Object>();
 			m.put("reason", reason);
 			m.put("userName", userName);
 			m.put("applyDate", sdf.format(date));
+			
 			list.add(m);
 		}
 		return list;

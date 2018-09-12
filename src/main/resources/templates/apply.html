@@ -42,7 +42,7 @@
 	
 	<script type="text/javascript">
 		$(function(){
-// 			loadMyApply();
+			loadMyApply();
 			holdOnMyAudit();
 		});
 		//待我审核的请假
@@ -70,7 +70,8 @@
 					for(var i=0;i<data.length;i++){
 						var applyDate=data[i].applyDate;
 						var reason=data[i].reason;
-						$("#myApply").append("<tr><td>申请时间:</td><td>"+applyDate+"</td><td>请假事由:</td><td>"+reason+"</td></tr>");
+						var audit=data[i].audit;
+						$("#myApply").append("<tr><td>申请时间:</td><td>"+applyDate+"</td><td>请假事由:</td><td>"+reason+"</td><td>审核人:</td><td>"+audit+"</td></tr>");
 					}
 				}
 			});
