@@ -55,10 +55,16 @@
 					for(var i=0;i<data.length;i++){
 						var applyDate=data[i].applyDate;
 						var reason=data[i].reason;
-						$("#holdOnMyAudit").append("<tr><td>申请时间:</td><td>"+applyDate+"</td><td>请假事由:</td><td>"+reason+"</td></tr>");
+						var taskId=data[i].taskId;
+						var applyUser=data[i].applyUser;
+						$("#holdOnMyAudit").append("<tr><td>申请人:</td><td>"+applyUser+"</td><td>申请时间:</td><td>"+applyDate+"</td><td>请假事由:</td><td>"+reason+"</td><td><input type='button' value='同意' onclick='agree('"+taskId+"')'></td></tr>");
 					}
 				}
 			});
+		}
+		//同意
+		function agree(taskId){
+			alert(taskId);
 		}
 		//我申请的记录
 		function loadMyApply(){

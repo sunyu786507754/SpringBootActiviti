@@ -13,11 +13,7 @@ import org.activiti.engine.HistoryService;
 import org.activiti.engine.IdentityService;
 import org.activiti.engine.RuntimeService;
 import org.activiti.engine.TaskService;
-import org.activiti.engine.history.HistoricProcessInstance;
-import org.activiti.engine.history.HistoricVariableInstance;
-import org.activiti.engine.identity.User;
 import org.activiti.engine.runtime.ProcessInstance;
-import org.activiti.engine.task.IdentityLink;
 import org.activiti.engine.task.Task;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -36,12 +32,14 @@ public class ActivitiService {
 	
 	//发起请假申请
 	public void submitApply(String userName, String reason) {
-		
+		SimpleDateFormat sdf=new SimpleDateFormat("yyyy-MM-dd");
+		Map<String,Object> variables = new HashMap<String, Object>();
+		variables.put("applyUser", userName);
 		identityService.setAuthenticatedUserId(userName);
 		
 		//开始流程
 		ProcessInstance processInstance = 
-				runtimeService.startProcessInstanceByKey("MyProcess1");
+				runtimeService.startProcessInstanceByKey("ProcessDemo20180912",variables);
 		// 查询当前任务
         Task currentTask = taskService.createTaskQuery().processInstanceId(processInstance.getId()).singleResult();
         // 申明任务
@@ -50,13 +48,12 @@ public class ActivitiService {
         Map<String, Object> vars = new HashMap<>();
         vars.put("userName", userName);
         vars.put("reason", reason);
-        vars.put("applyDate", new Date());
+        vars.put("applyDate", sdf.format(new Date()));
         // 完成任务
         taskService.complete(currentTask.getId(), vars);
 	}
 	//获取我发起的申请
 	public List<Map<String, Object>> loadMyApply(HttpSession session) {
-		SimpleDateFormat sdf=new SimpleDateFormat("yyyy-MM-dd");
 		List<Map<String, Object>> list=new ArrayList<>();
 		String userName=session.getAttribute("userName").toString();
 		List<ProcessInstance> instanceList = runtimeService.createProcessInstanceQuery().startedBy(userName).list();		
@@ -64,21 +61,14 @@ public class ActivitiService {
 		
 		for(ProcessInstance pi:instanceList) {
 			String reason = runtimeService.getVariable(pi.getId(), "reason", String.class);
-			Date date=runtimeService.getVariable(pi.getId(), "applyDate", Date.class);
+			String date=runtimeService.getVariable(pi.getId(), "applyDate", String.class);
+			// 查询当前任务
+	        Task currentTask = taskService.createTaskQuery().processInstanceId(pi.getId()).singleResult();
 			Map<String,Object> m=new HashMap<String,Object>();
 			m.put("reason", reason);
 			m.put("userName", userName);
-			m.put("applyDate", sdf.format(date));
-			
-			List<IdentityLink> identityLinkList=taskService.getIdentityLinksForTask("16");
-			StringBuffer sb=new StringBuffer();
-			for(IdentityLink il:identityLinkList) {
-	            if (sb.length() > 0) {//该步即不会第一位有逗号，也防止最后一位拼接逗号！
-	                sb.append(",");
-	            }
-	            sb.append(il.getUserId());
-			}
-			m.put("audit", sb.toString());
+			m.put("applyDate", date);
+			m.put("audit", currentTask.getAssignee());
 			
 			list.add(m);
 		}
@@ -88,22 +78,21 @@ public class ActivitiService {
 	//待我审核的请假
 	public List<Map<String, Object>> holdOnMyAudit(HttpSession session) {
 		String userName=session.getAttribute("userName").toString();
-		SimpleDateFormat sdf=new SimpleDateFormat("yyyy-MM-dd");
-		List<Task> taskList = taskService.createTaskQuery().taskCandidateUser(userName)
+		List<Task> taskList = taskService.createTaskQuery().taskAssignee(userName)
                 .orderByTaskCreateTime().desc().list();
 		List<Map<String,Object>> list=new ArrayList<>();
 		for (Task task : taskList) {
 			String instanceId = task.getProcessInstanceId();
 			ProcessInstance instance = runtimeService.createProcessInstanceQuery().processInstanceId(instanceId).singleResult();
-			
+			String applyUser=runtimeService.getVariable(instance.getId(), "userName", String.class);
 			String reason = runtimeService.getVariable(instance.getId(), "reason", String.class);
-			Date date=runtimeService.getVariable(instance.getId(), "applyDate", Date.class);
+			String date=runtimeService.getVariable(instance.getId(), "applyDate", String.class);
 			
 			Map<String,Object> m=new HashMap<String,Object>();
 			m.put("reason", reason);
-			m.put("userName", userName);
-			m.put("applyDate", sdf.format(date));
-			
+			m.put("applyUser", applyUser);
+			m.put("applyDate", date);
+			m.put("taksId", task.getId());
 			list.add(m);
 		}
 		return list;
