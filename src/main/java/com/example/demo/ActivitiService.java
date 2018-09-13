@@ -13,6 +13,9 @@ import org.activiti.engine.HistoryService;
 import org.activiti.engine.IdentityService;
 import org.activiti.engine.RuntimeService;
 import org.activiti.engine.TaskService;
+import org.activiti.engine.history.HistoricActivityInstance;
+import org.activiti.engine.history.HistoricProcessInstance;
+import org.activiti.engine.history.HistoricVariableInstance;
 import org.activiti.engine.runtime.ProcessInstance;
 import org.activiti.engine.task.Task;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -92,7 +95,40 @@ public class ActivitiService {
 			m.put("reason", reason);
 			m.put("applyUser", applyUser);
 			m.put("applyDate", date);
-			m.put("taksId", task.getId());
+			m.put("taskId", task.getId());
+			m.put("instanceId", instanceId);
+			list.add(m);
+		}
+		return list;
+	}
+	/**
+	 * 同意
+	 * @param taskId
+	 * @param instanceId
+	 */
+	public void agree(String taskId, String instanceId) {
+		taskService.addComment(taskId, instanceId, "同意");
+		taskService.complete(taskId);
+	}
+	/**
+	 * 我申请过的记录
+	 * @param session
+	 * @return
+	 */
+	public List<Map<String, Object>> loadAlreadyMyApply(HttpSession session) {
+		String userName=session.getAttribute("userName").toString();
+		List<HistoricProcessInstance> hisProInstance = historyService.createHistoricProcessInstanceQuery()
+                .processDefinitionKey("ProcessDemo20180912").startedBy(userName).finished()
+                .orderByProcessInstanceEndTime().desc().list();
+		List<Map<String,Object>> list=new ArrayList<>();
+		for(HistoricProcessInstance hpi:hisProInstance) {
+			Map<String,Object> m=new HashMap<String,Object>();
+			
+			List<HistoricVariableInstance> varInstanceList = historyService.createHistoricVariableInstanceQuery()
+                    .processInstanceId(hpi.getId()).list();
+			for(HistoricVariableInstance hi:varInstanceList) {
+				m.put(hi.getVariableName(), hi.getValue());
+			}
 			list.add(m);
 		}
 		return list;

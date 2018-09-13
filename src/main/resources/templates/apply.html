@@ -31,20 +31,40 @@
 		</tr>
 	</table>
 	<br />
-	<h1 >我申请的记录</h1>
+	<h1 >我正在申请记录</h1>
 	<br />
 	<table id="myApply"></table>
 	<br />
 	<h1>待我审核的请假</h1>
 	<br />
 	<table id="holdOnMyAudit"></table>
-	
+	<br />
+	<h1>我申请过的记录</h1>
+	<table id="alreadyMyApply"></table>
 	
 	<script type="text/javascript">
 		$(function(){
 			loadMyApply();
 			holdOnMyAudit();
+			loadAlreadyMyApply();
 		});
+		
+		//加载我申请过的记录
+		function loadAlreadyMyApply(){
+			$.ajax({
+				url:'/loadAlreadyMyApply',
+				type:'get',
+				dataType:'json',
+				success:function(data){
+					for(var i=0;i<data.length;i++){
+						var applyDate=data[i].applyDate;
+						var applyUser=data[i].applyUser;
+						var reason=data[i].reason;
+						$("#alreadyMyApply").append("<tr><td>申请人:</td><td>"+applyUser+"</td><td>申请时间:</td><td>"+applyDate+"</td><td>事由:</td><td>"+reason+"</td></tr>");
+					}
+				}
+			});
+		}
 		//待我审核的请假
 		function holdOnMyAudit(){
 			$.ajax({
@@ -57,14 +77,26 @@
 						var reason=data[i].reason;
 						var taskId=data[i].taskId;
 						var applyUser=data[i].applyUser;
-						$("#holdOnMyAudit").append("<tr><td>申请人:</td><td>"+applyUser+"</td><td>申请时间:</td><td>"+applyDate+"</td><td>请假事由:</td><td>"+reason+"</td><td><input type='button' value='同意' onclick='agree('"+taskId+"')'></td></tr>");
+						var instanceId=data[i].instanceId;
+						$("#holdOnMyAudit").append("<tr><td>申请人:</td><td>"+applyUser+"</td><td>申请时间:</td><td>"+applyDate+"</td><td>请假事由:</td><td>"+reason+"</td><td><input type='button' value='同意' onclick='agree("+taskId+","+instanceId+")'></td></tr>");
 					}
 				}
 			});
 		}
 		//同意
-		function agree(taskId){
-			alert(taskId);
+		function agree(taskId,instanceId){
+			$.ajax({
+				url:'/agree',
+				type:'post',
+				data:{
+					taskId:taskId,
+					instanceId:instanceId
+				},
+				dataType:'text',
+				success:function(data){
+					alert(data);
+				}
+			});
 		}
 		//我申请的记录
 		function loadMyApply(){

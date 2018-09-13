@@ -62,5 +62,24 @@ public class ActitiviController {
 		List<Map<String,Object>> list=activitiService.holdOnMyAudit(session);
 		return list;
 	}
+	/**
+	 * 同意
+	 * @param taskId
+	 * @param instanceId
+	 * @return
+	 */
+	@PostMapping("/agree")
+	@ResponseBody
+	public String agree(
+			@RequestParam("taskId")String taskId,
+			@RequestParam("instanceId")String instanceId) {
+		activitiService.agree(taskId,instanceId);
+		return "ok";
+	}
+	@GetMapping("/loadAlreadyMyApply")
+	@ResponseBody
+	public List<Map<String,Object>> loadAlreadyMyApply(HttpSession session){
+		return activitiService.loadAlreadyMyApply(session);
+	}
 	
 }
