@@ -41,13 +41,27 @@
 	<br />
 	<h1>我申请过的记录</h1>
 	<table id="alreadyMyApply"></table>
-	
+	<div>
+		<div>详细记录</div>
+		<div id="detail"></div>
+	</div>
 	<script type="text/javascript">
 		$(function(){
 			loadMyApply();
 			holdOnMyAudit();
 			loadAlreadyMyApply();
 		});
+		//查询审批记录详细
+		function detail(instanceId){
+			$.ajax({
+				url:'/detail/'+instanceId,
+				type:'get',
+				dataType:'json',
+				success:function(data){
+					console.log(data);
+				}
+			});
+		}
 		
 		//加载我申请过的记录
 		function loadAlreadyMyApply(){
@@ -60,7 +74,8 @@
 						var applyDate=data[i].applyDate;
 						var applyUser=data[i].applyUser;
 						var reason=data[i].reason;
-						$("#alreadyMyApply").append("<tr><td>申请人:</td><td>"+applyUser+"</td><td>申请时间:</td><td>"+applyDate+"</td><td>事由:</td><td>"+reason+"</td></tr>");
+						var instanceId=data[i].instanceId;
+						$("#alreadyMyApply").append("<tr><td>申请人:</td><td>"+applyUser+"</td><td>申请时间:</td><td>"+applyDate+"</td><td>事由:</td><td>"+reason+"</td><td><input type='button' onclick='detail("+instanceId+")' value='详细'></td></tr>");
 					}
 				}
 			});

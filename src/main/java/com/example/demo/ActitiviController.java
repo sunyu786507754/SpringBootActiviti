@@ -81,5 +81,10 @@ public class ActitiviController {
 	public List<Map<String,Object>> loadAlreadyMyApply(HttpSession session){
 		return activitiService.loadAlreadyMyApply(session);
 	}
+	@GetMapping("/detail/{instanceId}")
+	@ResponseBody
+	public List<Map<String,Object>> detail(@PathVariable("instanceId")String instanceId){
+		return activitiService.detail(instanceId);
+	}
 	
 }

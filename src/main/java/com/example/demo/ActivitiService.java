@@ -15,8 +15,10 @@ import org.activiti.engine.RuntimeService;
 import org.activiti.engine.TaskService;
 import org.activiti.engine.history.HistoricActivityInstance;
 import org.activiti.engine.history.HistoricProcessInstance;
+import org.activiti.engine.history.HistoricTaskInstance;
 import org.activiti.engine.history.HistoricVariableInstance;
 import org.activiti.engine.runtime.ProcessInstance;
+import org.activiti.engine.task.Comment;
 import org.activiti.engine.task.Task;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -129,9 +131,54 @@ public class ActivitiService {
 			for(HistoricVariableInstance hi:varInstanceList) {
 				m.put(hi.getVariableName(), hi.getValue());
 			}
+			m.put("instanceId", hpi.getId());
 			list.add(m);
 		}
 		return list;
+	}
+	/**
+	 * 审批记录详细
+	 * @param instanceId
+	 * @return
+	 */
+	public List<Map<String, Object>> detail(String instanceId) {
+		List<Map<String, Object>> l=new ArrayList<>();
+		//获取历史活动
+		List<HistoricProcessInstance> list = historyService
+				.createHistoricProcessInstanceQuery()
+				.processDefinitionId(instanceId)//流程定义ID
+				.list();
+		StringBuffer comment=new StringBuffer();
+		//获取添加的批注
+		for(HistoricProcessInstance hpi:list) {
+			Map<String,Object> m=new HashMap<String,Object>();
+			
+			List<HistoricVariableInstance> varInstanceList = historyService.createHistoricVariableInstanceQuery()
+                    .processInstanceId(hpi.getId()).list();
+			for(HistoricVariableInstance hi:varInstanceList) {
+				m.put(hi.getVariableName(), hi.getValue());
+			}
+			
+			
+			List<HistoricTaskInstance> htiList = historyService.createHistoricTaskInstanceQuery()//历史任务表查询
+					.processInstanceId(hpi.getId())//使用流程实例ID查询
+					.list();
+			for(HistoricTaskInstance hti:htiList){
+				//任务ID
+				String htaskId = hti.getId();
+				//获取批注信息
+				List<Comment> taskList = taskService.getTaskComments(htaskId);//对用历史完成后的任务ID
+				for(Comment c:taskList) {
+					comment.append(c.getFullMessage());
+				}
+			}
+			m.put("comment", comment.toString());
+			
+			l.add(m);
+			
+		}
+			
+		return l;
 	}
 	
 	
