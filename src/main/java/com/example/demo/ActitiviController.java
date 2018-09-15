@@ -17,10 +17,20 @@ import org.springframework.web.bind.annotation.ResponseBody;
 public class ActitiviController {
 	@Autowired
 	private ActivitiService activitiService;
+	/**
+	 * 跳转到登录首页
+	 * @return
+	 */
 	@GetMapping("/index")
 	public String startProcess() {
 		return "index";
 	}
+	/**
+	 * 登录后跳转到主页面
+	 * @param userName
+	 * @param session
+	 * @return
+	 */
 	@GetMapping("/apply/{userName}")
 	public String apply(@PathVariable("userName")String userName,HttpSession session) {
 		session.setAttribute("userName", userName);
@@ -81,10 +91,10 @@ public class ActitiviController {
 	public List<Map<String,Object>> loadAlreadyMyApply(HttpSession session){
 		return activitiService.loadAlreadyMyApply(session);
 	}
-	@GetMapping("/detail/{instanceId}")
+	@GetMapping("/detail/{businessKey}")
 	@ResponseBody
-	public List<Map<String,Object>> detail(@PathVariable("instanceId")String instanceId){
-		return activitiService.detail(instanceId);
+	public List<Map<String,Object>> detail(@PathVariable("businessKey")String businessKey){
+		return activitiService.detail(businessKey);
 	}
 	
 }
