@@ -58,7 +58,14 @@
 				type:'get',
 				dataType:'json',
 				success:function(data){
-					console.log(data);
+					$("#detail").empty();
+					for(var i=0;i<data.length;i++){
+						var assignee=data[i].assignee;
+						var comment=data[i].comment;
+						var auditDate=data[i].auditDate;
+						$("#detail").append("<p>审批人:"+assignee+",  审批意见:"+comment+",  审批日期:"+auditDate+" </p>");
+						
+					}
 				}
 			});
 		}
