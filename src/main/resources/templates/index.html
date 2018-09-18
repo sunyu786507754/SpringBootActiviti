@@ -7,12 +7,20 @@
 </head>
 <body>
 	用户名:<input type="text" th:value="applyUser" id="userName" /><br/>
+	角色:<select th:id="role">
+			<option th:value="p">个人</option>
+			<option th:value="firstAudit">一级审批</option>
+			<option th:value="secondAudit">二级审批</option>
+			<option th:value="thirdAudit">三级审批</option>
+		</select> 
+		<br/>
 	<input type="button" value="登录" onclick="login()" />
 	
 	<script type="text/javascript">
 		function login(){
 			var userName=$("#userName").val();
-			window.location.href="/apply/"+userName;
+			var role=$("#role").val();
+			window.location.href="/apply/"+userName+"/"+role;
 		}
 	</script>
 </body>

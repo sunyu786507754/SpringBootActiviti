@@ -31,9 +31,13 @@ public class ActitiviController {
 	 * @param session
 	 * @return
 	 */
-	@GetMapping("/apply/{userName}")
-	public String apply(@PathVariable("userName")String userName,HttpSession session) {
+	@GetMapping("/apply/{userName}/{role}")
+	public String apply(
+			@PathVariable("userName")String userName,
+			@PathVariable("role")String role,
+			HttpSession session) {
 		session.setAttribute("userName", userName);
+		session.setAttribute("role", role);
 		return "apply";
 	}
 	/**

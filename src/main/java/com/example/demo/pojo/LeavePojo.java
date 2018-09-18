@@ -21,6 +21,9 @@ public class LeavePojo {
 	private String applyReason;//申请原因
 	@Column
 	private Date applyDate;//申请日期
+	@Column
+	private String applyStatus;//审批状态 0待审 1审核通过 2审核不通过
+	
 	public Integer getId() {
 		return Id;
 	}
@@ -44,6 +47,12 @@ public class LeavePojo {
 	}
 	public void setApplyDate(Date applyDate) {
 		this.applyDate = applyDate;
+	}
+	public String getApplyStatus() {
+		return applyStatus;
+	}
+	public void setApplyStatus(String applyStatus) {
+		this.applyStatus = applyStatus;
 	}
 	
 	

@@ -7,6 +7,10 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import javax.persistence.criteria.CriteriaBuilder;
+import javax.persistence.criteria.CriteriaQuery;
+import javax.persistence.criteria.Predicate;
+import javax.persistence.criteria.Root;
 import javax.servlet.http.HttpSession;
 
 import org.activiti.engine.HistoryService;
@@ -18,17 +22,24 @@ import org.activiti.engine.history.HistoricTaskInstance;
 import org.activiti.engine.history.HistoricVariableInstance;
 import org.activiti.engine.runtime.ProcessInstance;
 import org.activiti.engine.task.Comment;
+import org.activiti.engine.task.IdentityLink;
 import org.activiti.engine.task.Task;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.jpa.domain.Specification;
+import org.springframework.data.jpa.domain.Specifications;
 import org.springframework.stereotype.Service;
 
 import com.example.demo.pojo.LeavePojo;
+import com.example.demo.pojo.UserPojo;
 import com.example.demo.reposity.LeaveReposity;
+import com.example.demo.reposity.UserReposity;
 
 @Service("activitiService")
 public class ActivitiService {
 	@Autowired
 	private LeaveReposity leaveReposity;
+	@Autowired
+	private UserReposity userReposity;
 	
 	@Autowired
     private RuntimeService runtimeService;
@@ -46,6 +57,7 @@ public class ActivitiService {
 		lp.setApplyName(userName);
 		lp.setApplyReason(reason);
 		lp.setApplyDate(new Date());
+		lp.setApplyStatus("0");
 		
 		leaveReposity.save(lp);
 		
@@ -53,12 +65,15 @@ public class ActivitiService {
 		
 		Map<String,Object> variables = new HashMap<String, Object>();
 		variables.put("applyUser", userName);
+		variables.put("firstAudit", "firstAudit");
+		variables.put("secondAudit", "secondAudit");
+		variables.put("thirdAudit", "thirdAudit");
 		
 		identityService.setAuthenticatedUserId(userName);
 //		
 		//开始流程
 		ProcessInstance processInstance = 
-				runtimeService.startProcessInstanceByKey("leaveProcess",businessKey,variables);
+				runtimeService.startProcessInstanceByKey("leaveProcess2",businessKey,variables);
 		// 查询当前任务
         Task currentTask = taskService.createTaskQuery().processInstanceId(processInstance.getId()).singleResult();
         // 申明任务
@@ -84,11 +99,34 @@ public class ActivitiService {
 	        String primaryId=businessKey.substring(18);
 	        LeavePojo lp=leaveReposity.findById(Integer.valueOf(primaryId)).get() ;
 	        
-			Map<String,Object> m=new HashMap<String,Object>();
+	        List<IdentityLink> identityList= taskService.getIdentityLinksForTask(currentTask.getId());
+	        StringBuffer audit=new StringBuffer();
+	        for(IdentityLink il:identityList) {
+	        	String groupId=il.getGroupId();
+	        	List<UserPojo> listUser=userReposity.findAll(new Specification<UserPojo>(){
+					@Override
+					public Predicate toPredicate(Root<UserPojo> root, CriteriaQuery<?> query, CriteriaBuilder cb) {
+						List<Predicate> list = new ArrayList<Predicate>();
+						list.add(cb.equal(root.get("roleName").as(String.class), groupId));
+						Predicate[] p = new Predicate[list.size()];
+			            return cb.and(list.toArray(p));
+						
+					}
+	        		
+	        	});
+	        	for(int i=0;i<listUser.size();i++) {
+	        		UserPojo up=listUser.get(i);
+	        		audit.append(up.getUserName());
+	        		if(i<listUser.size()-1) {
+	        			audit.append(",");
+	        		}
+	        	}
+	        }
+	        Map<String,Object> m=new HashMap<String,Object>();
 			m.put("applyName", lp.getApplyName());//申请人
 			m.put("applyReason", lp.getApplyReason());//申请理由
 			m.put("applyDate", sdf.format(lp.getApplyDate()));//申请日期
-			m.put("audit", currentTask.getAssignee());//待审人
+			m.put("audit", audit.toString());//待审人
 			
 			list.add(m);
 		}
@@ -98,8 +136,8 @@ public class ActivitiService {
 	//待我审核的请假
 	public List<Map<String, Object>> holdOnMyAudit(HttpSession session) {
 		SimpleDateFormat sdf=new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
-		String userName=session.getAttribute("userName").toString();
-		List<Task> taskList = taskService.createTaskQuery().taskAssignee(userName)
+		String role=session.getAttribute("role").toString();
+		List<Task> taskList = taskService.createTaskQuery().taskCandidateGroup(role)
                 .orderByTaskCreateTime().desc().list();
 		List<Map<String,Object>> list=new ArrayList<>();
 		for (Task task : taskList) {
