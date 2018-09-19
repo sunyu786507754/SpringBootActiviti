@@ -163,7 +163,10 @@ public class ActivitiService {
 	 * @param taskId
 	 * @param instanceId
 	 */
-	public void agree(String taskId, String instanceId) {
+	public void agree(String taskId, String instanceId,String userName) {
+		
+		
+		taskService.setAssignee(taskId, userName);
 		taskService.addComment(taskId, instanceId, "同意");
 		taskService.complete(taskId);
 	}
@@ -176,7 +179,7 @@ public class ActivitiService {
 		SimpleDateFormat sdf=new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
 		String userName=session.getAttribute("userName").toString();
 		List<HistoricProcessInstance> hisProInstance = historyService.createHistoricProcessInstanceQuery()
-                .processDefinitionKey("leaveProcess").startedBy(userName).finished()
+                .processDefinitionKey("leaveProcess2").startedBy(userName).finished()
                 .orderByProcessInstanceEndTime().desc().list();
 		List<Map<String,Object>> list=new ArrayList<>();
 		for(HistoricProcessInstance hpi:hisProInstance) {

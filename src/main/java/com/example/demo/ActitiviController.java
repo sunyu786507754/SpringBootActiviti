@@ -86,8 +86,10 @@ public class ActitiviController {
 	@ResponseBody
 	public String agree(
 			@RequestParam("taskId")String taskId,
-			@RequestParam("instanceId")String instanceId) {
-		activitiService.agree(taskId,instanceId);
+			@RequestParam("instanceId")String instanceId,
+			HttpSession session) {
+		String userName=session.getAttribute("userName").toString();
+		activitiService.agree(taskId,instanceId,userName);
 		return "ok";
 	}
 	@GetMapping("/loadAlreadyMyApply")
